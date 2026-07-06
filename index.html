@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Clima Família IA</title>
+<meta name="theme-color" content="#0077FF">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div id="app" data-theme="light">
+
+  <div id="toast-stack"></div>
+
+  <!-- ============ ANIMATED WEATHER BACKGROUND ============ -->
+  <div id="weather-bg"></div>
+
+  <!-- ============ HOME ============ -->
+  <section class="screen active" id="screen-home">
+    <div class="home-header">
+      <div class="clock-time" id="clock-time">--:--</div>
+      <div class="clock-date" id="clock-date">carregando data...</div>
+      <div class="greeting-card">
+        <h1 id="greeting-text">Olá! 👋</h1>
+        <p id="greeting-sub">Preparando seu painel do dia...</p>
+      </div>
+    </div>
+    <div class="scroll-area">
+      <div class="quick-grid">
+        <div class="quick-tile" data-goto="weather"><span class="emoji">🌧️</span><span class="label">Clima</span></div>
+        <div class="quick-tile" data-goto="tides"><span class="emoji">🌊</span><span class="label">Marés</span></div>
+        <div class="quick-tile" data-goto="alerts"><span class="emoji">⚠️</span><span class="label">Alertas</span></div>
+      </div>
+      <div class="card" id="home-weather-preview">
+        <div class="section-title">🌤️ Agora em <span id="home-city">--</span></div>
+        <div class="skeleton" style="height:60px;"></div>
+      </div>
+      <div class="card" id="home-tide-preview">
+        <div class="section-title">🌊 Próxima maré</div>
+        <div class="skeleton" style="height:40px;"></div>
+      </div>
+      <div class="card" id="home-alert-preview">
+        <div class="section-title">⚠️ Status de alerta</div>
+        <div class="skeleton" style="height:40px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WEATHER ============ -->
+  <section class="screen" id="screen-weather">
+    <div class="topbar">
+      <div><h1>Clima</h1><div class="loc" id="weather-loc">Localizando...</div></div>
+      <button class="icon-btn edit" id="refresh-weather">🔄</button>
+    </div>
+    <div class="scroll-area">
+      <div class="card">
+        <div class="temp-hero">
+          <div class="big-temp" id="w-temp">--°</div>
+          <div class="cond" id="w-cond">Carregando...</div>
+        </div>
+        <div class="metrics-grid" id="w-metrics"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">📅 Previsão</div>
+        <div class="day-tabs" id="day-tabs"></div>
+        <div id="forecast-list"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">🗺️ Mapa de chuva (simulado)</div>
+        <div id="rain-map" style="height:150px; border-radius:14px; position:relative; overflow:hidden; background:linear-gradient(135deg,#1b2a4a,#0077FF);"></div>
+        <p style="font-size:.75rem; color:var(--text-soft); margin-top:8px;">Visualização simulada do radar — pronta para integração com API real de radar meteorológico.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TIDES ============ -->
+  <section class="screen" id="screen-tides">
+    <div class="topbar"><div><h1>Marés</h1><div class="loc" id="tides-loc">--</div></div></div>
+    <div class="scroll-area">
+      <div class="card">
+        <div class="tide-now">
+          <div>
+            <div style="font-size:.8rem; color:var(--text-soft);">Situação atual</div>
+            <div style="font-size:1.4rem; font-weight:800;" id="tide-current-height">-- m</div>
+          </div>
+          <span class="tide-badge alta" id="tide-badge">--</span>
+        </div>
+        <canvas id="tide-chart" height="90" style="width:100%; margin-top:14px;"></canvas>
+      </div>
+      <div class="card">
+        <div class="section-title">🕐 Próximas marés</div>
+        <div class="tide-list" id="tide-list"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">🌙 Fase da Lua</div>
+        <div class="moon-row">
+          <div class="moon-icon" id="moon-icon">🌔</div>
+          <div>
+            <div style="font-weight:700;" id="moon-phase">--</div>
+            <div style="font-size:.78rem; color:var(--text-soft);" id="moon-times">Nascer / Pôr --</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ALERTS ============ -->
+  <section class="screen" id="screen-alerts">
+    <div class="topbar"><h1>Alertas</h1></div>
+    <div class="scroll-area" id="alerts-list"></div>
+  </section>
+
+  <!-- ============ FAMILY ============ -->
+  <section class="screen" id="screen-family">
+    <div class="topbar"><h1>Família</h1></div>
+    <div class="scroll-area">
+      <input type="text" class="contact-search" id="contact-search" placeholder="🔎 Buscar contato...">
+      <div id="contacts-list"></div>
+    </div>
+    <button class="fab-add" id="fab-add-contact" title="Adicionar contato">+</button>
+  </section>
+
+  <!-- ============ CHAT / IA ============ -->
+  <section class="screen" id="screen-chat">
+    <div class="topbar"><h1>Assistente IA</h1></div>
+    <div class="scroll-area" id="chat-log"></div>
+    <div class="chat-input-bar">
+      <button class="chat-mic" id="chat-mic" title="Falar (em breve)">🎙️</button>
+      <input type="text" id="chat-input" placeholder="Pergunte sobre clima, maré, lembretes...">
+      <button class="chat-send" id="chat-send">➤</button>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section class="screen" id="screen-settings">
+    <div class="topbar"><h1>Configurações</h1></div>
+    <div class="scroll-area">
+      <div class="card">
+        <div class="section-title">🎨 Tema</div>
+        <div style="display:flex; gap:14px; padding:4px 2px;">
+          <div class="theme-dot active" data-theme-choice="light" style="background:linear-gradient(135deg,#fff,#F2F5F7);"></div>
+          <div class="theme-dot" data-theme-choice="dark" style="background:linear-gradient(135deg,#0b1030,#241a4a);"></div>
+          <div class="theme-dot" data-theme-choice="blue" style="background:linear-gradient(135deg,#001E3C,#0077FF);"></div>
+          <div class="theme-dot" data-theme-choice="green" style="background:linear-gradient(135deg,#03321f,#0c6b45);"></div>
+          <div class="theme-dot" data-theme-choice="red" style="background:linear-gradient(135deg,#3a0b0b,#7a1414);"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="setting-row">
+          <span>Tamanho da fonte</span>
+          <div style="display:flex; gap:8px;">
+            <button class="icon-btn edit" id="font-dec">A-</button>
+            <button class="icon-btn edit" id="font-inc">A+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span>Som de alertas</span>
+          <div class="switch on" id="toggle-sound"><div class="knob"></div></div>
+        </div>
+        <div class="setting-row">
+          <span>Notificações</span>
+          <div class="switch on" id="toggle-notif"><div class="knob"></div></div>
+        </div>
+        <div class="setting-row">
+          <span>Atualização automática</span>
+          <div class="switch on" id="toggle-auto"><div class="knob"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">📍 Localização</div>
+        <p style="font-size:.85rem; color:var(--text-soft);" id="settings-location-info">Detectando localização...</p>
+        <button class="btn ghost" id="btn-detect-location">Detectar novamente</button>
+      </div>
+      <div class="card">
+        <p style="font-size:.72rem; color:var(--text-soft); text-align:center; margin:0;">
+          Clima Família IA · dados simulados nesta versão · pronto para integração com APIs reais de clima, maré, alertas e IA.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOATING WHATSAPP -->
+  <button class="fab-whatsapp" id="fab-whatsapp" title="WhatsApp">💬</button>
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" data-screen="home"><span class="nav-icon">🏠</span>Início</button>
+    <button class="nav-btn" data-screen="weather"><span class="nav-icon">🌧️</span>Clima</button>
+    <button class="nav-btn" data-screen="tides"><span class="nav-icon">🌊</span>Marés</button>
+    <button class="nav-btn" data-screen="alerts"><span class="nav-icon">⚠️</span>Alertas</button>
+    <button class="nav-btn" data-screen="family"><span class="nav-icon">👨‍👩‍👧</span>Família</button>
+    <button class="nav-btn" data-screen="chat"><span class="nav-icon">💬</span>IA</button>
+    <button class="nav-btn" data-screen="settings"><span class="nav-icon">⚙️</span>Ajustes</button>
+  </nav>
+
+  <!-- MODAL: contact form -->
+  <div class="modal-backdrop" id="contact-modal">
+    <div class="modal-sheet">
+      <h3 id="contact-modal-title">Novo contato</h3>
+      <input type="hidden" id="contact-id">
+      <div class="field"><label>Nome</label><input type="text" id="c-name" placeholder="Ex: Mãe"></div>
+      <div class="field"><label>Telefone / WhatsApp</label><input type="tel" id="c-phone" placeholder="+55 81 9XXXX-XXXX"></div>
+      <div class="field"><label>Endereço</label><input type="text" id="c-address" placeholder="Opcional"></div>
+      <div class="field"><label>Observações</label><input type="text" id="c-notes" placeholder="Opcional"></div>
+      <button class="btn primary" id="save-contact">Salvar contato</button>
+      <button class="btn ghost" id="cancel-contact">Cancelar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   storage.js — persistência local
+   ============================================================ */
+const StorageModule = (() => {
+  const KEYS = { contacts:'cf_contacts', settings:'cf_settings', chat:'cf_chat_history', favorites:'cf_favorites' };
+  const get = (k, fallback) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch(e){ return fallback; } };
+  const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+  return { KEYS, get, set };
+})();
+
+/* ============================================================
+   clock.js — hora, data, saudação
+   ============================================================ */
+const ClockModule = (() => {
+  const dias = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+  function tick(){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('clock-time').textContent = `${hh}:${mm}`;
+    document.getElementById('clock-date').textContent = `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]}`;
+    updateGreeting(now.getHours());
+  }
+  function updateGreeting(hour){
+    let text, emoji;
+    if(hour < 6){ text='Boa madrugada'; emoji='🌙'; }
+    else if(hour < 12){ text='Bom dia'; emoji='☀️'; }
+    else if(hour < 18){ text='Boa tarde'; emoji='🌤️'; }
+    else { text='Boa noite'; emoji='🌙'; }
+    document.getElementById('greeting-text').textContent = `${text}! ${emoji}`;
+    document.getElementById('greeting-sub').textContent = 'Aqui está o resumo do seu dia.';
+  }
+  function init(){ tick(); setInterval(tick, 15000); }
+  return { init };
+})();
+
+/* ============================================================
+   location.js — geolocalização (com fallback simulado)
+   ============================================================ */
+const LocationModule = (() => {
+  let current = { city:'Recife', state:'PE', country:'Brasil', lat:-8.05, lon:-34.90, source:'padrão' };
+
+  function detect(onDone){
+    if(!navigator.geolocation){
+      onDone(current); return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        current = { ...current, lat:pos.coords.latitude, lon:pos.coords.longitude, source:'GPS do dispositivo' };
+        onDone(current);
+      },
+      () => onDone(current),
+      { timeout:5000 }
+    );
+  }
+  function get(){ return current; }
+  return { detect, get };
+})();
+
+/* ============================================================
+   weather.js — clima (DADOS SIMULADOS)
+   ============================================================ */
+const WeatherModule = (() => {
+  const conditions = ['sol','nublado','chuva','tempestade','noite'];
+  let currentCondition = 'sol';
+  let currentData = null;
+
+  function randomBetween(min,max){ return Math.round((Math.random()*(max-min)+min)); }
+
+  function generateMock(){
+    const hour = new Date().getHours();
+    currentCondition = (hour >= 19 || hour < 5) ? 'noite' : conditions[Math.floor(Math.random()*4)];
+    currentData = {
+      temp: randomBetween(24,32),
+      feelsLike: randomBetween(25,34),
+      humidity: randomBetween(55,90),
+      pressure: randomBetween(1005,1018),
+      windSpeed: randomBetween(5,28),
+      windDir: ['N','NE','E','SE','S','SO','O','NO'][randomBetween(0,7)],
+      sunrise:'05:24', sunset:'17:38',
+      uv: randomBetween(1,11),
+      rainChance: randomBetween(5,90),
+      rainAmount: (Math.random()*20).toFixed(1),
+      condition: currentCondition
+    };
+    return currentData;
+  }
+
+  function conditionLabel(c){
+    return { sol:'Ensolarado', nublado:'Nublado', chuva:'Chuva', tempestade:'Tempestade', noite:'Céu limpo (noite)' }[c] || 'Indefinido';
+  }
+  function conditionIcon(c){
+    return { sol:'☀️', nublado:'☁️', chuva:'🌧️', tempestade:'⛈️', noite:'🌙' }[c] || '🌤️';
+  }
+
+  function generateForecast(days){
+    const arr = [];
+    const labels = ['Hoje','Amanhã','Ter','Qua','Qui','Sex','Sáb','Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    for(let i=0;i<days;i++){
+      const c = conditions[Math.floor(Math.random()*4)];
+      arr.push({
+        label: labels[i] || `Dia ${i+1}`,
+        condition:c,
+        min: randomBetween(20,24),
+        max: randomBetween(27,34),
+        rain: randomBetween(0,95)
+      });
+    }
+    return arr;
+  }
+
+  function getCurrent(){ return currentData || generateMock(); }
+  function getConditionNow(){ return currentCondition; }
+
+  return { generateMock, getCurrent, generateForecast, conditionLabel, conditionIcon, getConditionNow };
+})();
+
+/* ============================================================
+   tides.js — marés (DADOS SIMULADOS)
+   ============================================================ */
+const TidesModule = (() => {
+  function generateMock(){
+    const now = new Date();
+    const events = [];
+    let h = 2;
+    const types = ['baixa','alta','baixa','alta'];
+    types.forEach((t,i) => {
+      h += 5 + Math.random()*1.5;
+      const hour = Math.floor(h % 24);
+      const min = Math.floor((h % 1) * 60);
+      events.push({ type:t, time:`${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`, height:(t==='alta'? (1.8+Math.random()*0.6) : (0.2+Math.random()*0.4)).toFixed(1) });
+    });
+    const phases = ['🌑 Nova','🌒 Crescente','🌓 Quarto Crescente','🌔 Gibosa Crescente','🌕 Cheia','🌖 Gibosa Minguante','🌗 Quarto Minguante','🌘 Minguante'];
+    const phaseIndex = new Date().getDate() % phases.length;
+    return {
+      current: events[0].type === 'alta' ? 'baixa' : 'alta',
+      currentHeight:(1.0+Math.random()*0.8).toFixed(1),
+      events,
+      moonPhase: phases[phaseIndex],
+      moonrise:'18:12', moonset:'06:04'
+    };
+  }
+  return { generateMock };
+})();
+
+/* ============================================================
+   alerts.js — alertas meteorológicos (DADOS SIMULADOS)
+   ============================================================ */
+const AlertsModule = (() => {
+  const levels = [
+    { key:'green', label:'Situação normal', desc:'Nenhum risco identificado nas próximas horas.' },
+    { key:'yellow', label:'Atenção', desc:'Possibilidade de chuva forte isolada nas próximas 6 horas.' },
+    { key:'orange', label:'Perigo', desc:'Risco de alagamentos em áreas baixas e ventos fortes.' },
+    { key:'red', label:'Grande perigo', desc:'Risco severo de temporais, raios e deslizamentos. Evite áreas de risco.' }
+  ];
+  function generateMock(){
+    // Pondera para a maioria das vezes ser verde/amarelo, ocasionalmente laranja/vermelho
+    const roll = Math.random();
+    let idx = 0;
+    if(roll > 0.93) idx = 3; else if(roll > 0.8) idx = 2; else if(roll > 0.55) idx = 1;
+    const active = levels[idx];
+    return { active, history:[levels[0], levels[1]].concat(idx>1?[active]:[]) };
+  }
+  return { generateMock, levels };
+})();
+
+/* ============================================================
+   contacts.js — agenda da família
+   ============================================================ */
+const ContactsModule = (() => {
+  function seedIfEmpty(){
+    let list = StorageModule.get(StorageModule.KEYS.contacts, null);
+    if(!list){
+      list = [
+        { id:cryptoId(), name:'Mãe', phone:'+55 81 90000-0001', address:'', notes:'Ligar todo domingo', favorite:true },
+        { id:cryptoId(), name:'Pai', phone:'+55 81 90000-0002', address:'', notes:'', favorite:false },
+        { id:cryptoId(), name:'Filho(a)', phone:'+55 81 90000-0003', address:'Escola Municipal', notes:'Buscar às 17h', favorite:true }
+      ];
+      StorageModule.set(StorageModule.KEYS.contacts, list);
+    }
+    return list;
+  }
+  function cryptoId(){ return 'c_' + Math.random().toString(36).slice(2,10); }
+  function getAll(){ return StorageModule.get(StorageModule.KEYS.contacts, []); }
+  function save(contact){
+    let list = getAll();
+    if(contact.id){
+      list = list.map(c => c.id === contact.id ? { ...c, ...contact } : c);
+    } else {
+      contact.id = cryptoId();
+      contact.favorite = false;
+      list.push(contact);
+    }
+    StorageModule.set(StorageModule.KEYS.contacts, list);
+    return list;
+  }
+  function remove(id){
+    const list = getAll().filter(c => c.id !== id);
+    StorageModule.set(StorageModule.KEYS.contacts, list);
+    return list;
+  }
+  function toggleFavorite(id){
+    const list = getAll().map(c => c.id === id ? { ...c, favorite: !c.favorite } : c);
+    StorageModule.set(StorageModule.KEYS.contacts, list);
+    return list;
+  }
+  return { seedIfEmpty, getAll, save, remove, toggleFavorite };
+})();
+
+/* ============================================================
+   chatbot.js — assistente IA (respostas simuladas por regras)
+   ============================================================ */
+const ChatbotModule = (() => {
+  function reply(userText){
+    const t = userText.toLowerCase();
+    if(t.includes('chuva') || t.includes('clima') || t.includes('tempo')){
+      const w = WeatherModule.getCurrent();
+      return `Agora está ${WeatherModule.conditionLabel(w.condition).toLowerCase()}, ${w.temp}°C, com ${w.rainChance}% de chance de chuva. Quer que eu te avise se a previsão mudar?`;
+    }
+    if(t.includes('maré')){
+      const tide = TidesModule.generateMock();
+      const next = tide.events[0];
+      return `A próxima maré é ${next.type} às ${next.time}, com altura estimada de ${next.height}m.`;
+    }
+    if(t.includes('alerta')){
+      const a = AlertsModule.generateMock().active;
+      return `O nível de alerta atual é "${a.label}". ${a.desc}`;
+    }
+    if(t.includes('lembrete') || t.includes('lembrar')){
+      return 'Consegui anotar! (Nesta versão os lembretes ainda são simulados — em breve vou te avisar automaticamente por notificação.)';
+    }
+    if(t.includes('oi') || t.includes('olá') || t.includes('ola')){
+      return 'Oi! Eu sou a assistente do Clima Família IA 💙 Posso te ajudar com clima, marés, alertas ou lembretes. O que você precisa?';
+    }
+    if(t.includes('ajuda')){
+      return 'Você pode me perguntar coisas como: "vai chover hoje?", "quando é a próxima maré?", "tem algum alerta?" ou pedir para eu anotar um lembrete.';
+    }
+    return 'Entendi! Ainda estou aprendendo (esta é uma versão simulada), mas já posso te ajudar com clima, marés, alertas e lembretes rápidos.';
+  }
+  return { reply };
+})();
+
+/* ============================================================
+   app.js — navegação, inicialização e ligação dos módulos
+   ============================================================ */
+const AppModule = (() => {
+  const screens = ['home','weather','tides','alerts','family','chat','settings'];
+  let dayTabIndex = 0;
+  let forecastData = [];
+
+  function goto(screen){
+    screens.forEach(s => {
+      document.getElementById('screen-'+s).classList.toggle('active', s===screen);
+    });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.screen === screen);
+    });
+    if(screen === 'weather') renderWeather();
+    if(screen === 'tides') renderTides();
+    if(screen === 'alerts') renderAlerts();
+    if(screen === 'family') renderContacts();
+    if(screen === 'chat') renderChatIfEmpty();
+  }
+
+  /* ---------- animated background ---------- */
+  function renderBackground(condition){
+    const bg = document.getElementById('weather-bg');
+    bg.innerHTML = '';
+    const app = document.getElementById('app');
+    const themeMap = {
+      sol:['#3FA9F5','#00D4C4'], nublado:['#7f97ad','#a9bcc9'], chuva:['#3a5877','#1b2a4a'],
+      tempestade:['#232946','#0f1626'], noite:['#0b1030','#1c2340']
+    };
+    const colors = themeMap[condition] || themeMap.sol;
+    if(app.getAttribute('data-theme') === 'light' || !app.getAttribute('data-theme')){
+      app.style.setProperty('--bg-1', colors[0]);
+      app.style.setProperty('--bg-2', colors[1]);
+    }
+    if(condition === 'sol'){
+      const sun = document.createElement('div'); sun.className='sun'; bg.appendChild(sun);
+      bg.insertAdjacentHTML('beforeend', '<div class="cloud cloud2"></div>');
+    } else if(condition === 'nublado'){
+      bg.insertAdjacentHTML('beforeend', '<div class="cloud cloud1"></div><div class="cloud cloud2"></div>');
+    } else if(condition === 'chuva' || condition === 'tempestade'){
+      bg.insertAdjacentHTML('beforeend', '<div class="cloud cloud1" style="opacity:.85"></div>');
+      for(let i=0;i<26;i++){
+        const drop = document.createElement('div');
+        drop.className='rain-drop';
+        drop.style.left = Math.random()*100+'%';
+        drop.style.height = (10+Math.random()*16)+'px';
+        drop.style.animationDuration = (0.6+Math.random()*0.6)+'s';
+        drop.style.animationDelay = (Math.random()*2)+'s';
+        bg.appendChild(drop);
+      }
+      if(condition === 'tempestade'){
+        const bolt = document.createElement('div'); bolt.className='bolt'; bolt.textContent='⚡';
+        bolt.style.top='20%'; bolt.style.left='40%';
+        bg.appendChild(bolt);
+      }
+    } else if(condition === 'noite'){
+      const moon = document.createElement('div'); moon.className='moon'; bg.appendChild(moon);
+      for(let i=0;i<40;i++){
+        const star = document.createElement('div');
+        star.className='star';
+        star.style.left = Math.random()*100+'%';
+        star.style.top = Math.random()*70+'%';
+        star.style.animationDelay = (Math.random()*2)+'s';
+        bg.appendChild(star);
+      }
+    }
+  }
+
+  /* ---------- HOME preview ---------- */
+  function renderHomePreview(){
+    const loc = LocationModule.get();
+    document.getElementById('home-city').textContent = `${loc.city}, ${loc.state}`;
+    const w = WeatherModule.generateMock();
+    renderBackground(w.condition);
+    document.getElementById('home-weather-preview').innerHTML = `
+      <div class="section-title">${WeatherModule.conditionIcon(w.condition)} Agora em ${loc.city}</div>
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div class="big-temp" style="font-size:2.4rem; font-weight:800;">${w.temp}°</div>
+        <div style="text-align:right;">
+          <div style="color:var(--text-soft); font-size:.85rem;">${WeatherModule.conditionLabel(w.condition)}</div>
+          <div style="color:var(--accent); font-size:.8rem;">☔ ${w.rainChance}% de chance de chuva</div>
+        </div>
+      </div>`;
+
+    const tide = TidesModule.generateMock();
+    const next = tide.events[0];
+    document.getElementById('home-tide-preview').innerHTML = `
+      <div class="section-title">🌊 Próxima maré</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Maré <b>${next.type}</b> às <b>${next.time}</b></span>
+        <span class="tide-badge ${next.type}">${next.height}m</span>
+      </div>`;
+
+    const alert = AlertsModule.generateMock().active;
+    document.getElementById('home-alert-preview').innerHTML = `
+      <div class="section-title">⚠️ Status de alerta</div>
+      <div class="alert-item alert-${alert.key}" style="margin:0;">
+        <div class="alert-dot"></div>
+        <div><div class="alert-title">${alert.label}</div><div class="alert-desc">${alert.desc}</div></div>
+      </div>`;
+  }
+
+  /* ---------- WEATHER screen ---------- */
+  function renderWeather(){
+    const loc = LocationModule.get();
+    document.getElementById('weather-loc').textContent = `${loc.city}, ${loc.state} · ${loc.source}`;
+    const w = WeatherModule.getCurrent();
+    renderBackground(w.condition);
+    document.getElementById('w-temp').textContent = `${w.temp}°`;
+    document.getElementById('w-cond').textContent = `${WeatherModule.conditionIcon(w.condition)} ${WeatherModule.conditionLabel(w.condition)} · Sensação ${w.feelsLike}°`;
+    document.getElementById('w-metrics').innerHTML = `
+      <div class="metric"><div class="m-label">Umidade</div><div class="m-value">${w.humidity}%</div></div>
+      <div class="metric"><div class="m-label">Pressão</div><div class="m-value">${w.pressure} hPa</div></div>
+      <div class="metric"><div class="m-label">Vento</div><div class="m-value">${w.windSpeed} km/h ${w.windDir}</div></div>
+      <div class="metric"><div class="m-label">Índice UV</div><div class="m-value">${w.uv}</div></div>
+      <div class="metric"><div class="m-label">Nascer do sol</div><div class="m-value">🌅 ${w.sunrise}</div></div>
+      <div class="metric"><div class="m-label">Pôr do sol</div><div class="m-value">🌇 ${w.sunset}</div></div>
+      <div class="metric"><div class="m-label">Chance de chuva</div><div class="m-value">${w.rainChance}%</div></div>
+      <div class="metric"><div class="m-label">Vol. de chuva</div><div class="m-value">${w.rainAmount} mm</div></div>`;
+
+    forecastData = WeatherModule.generateForecast(14);
+    const tabs = ['Hoje','Amanhã','7 dias','14 dias'];
+    document.getElementById('day-tabs').innerHTML = tabs.map((t,i) =>
+      `<div class="day-tab ${i===dayTabIndex?'active':''}" data-tab="${i}">${t}</div>`).join('');
+    renderForecastList();
+    document.querySelectorAll('.day-tab').forEach(tab => {
+      tab.onclick = () => { dayTabIndex = +tab.dataset.tab; renderWeather(); };
+    });
+
+    const map = document.getElementById('rain-map');
+    map.innerHTML = '';
+    for(let i=0;i<8;i++){
+      const blob = document.createElement('div');
+      blob.style.position='absolute';
+      blob.style.width = (40+Math.random()*60)+'px';
+      blob.style.height = blob.style.width;
+      blob.style.borderRadius='50%';
+      blob.style.background='rgba(255,255,255,.18)';
+      blob.style.left = Math.random()*90+'%';
+      blob.style.top = Math.random()*80+'%';
+      blob.style.filter='blur(6px)';
+      blob.style.animation = `driftCloud ${10+Math.random()*10}s linear infinite`;
+      map.appendChild(blob);
+    }
+  }
+  function renderForecastList(){
+    const counts = [1,2,7,14];
+    const days = forecastData.slice(0, counts[dayTabIndex]);
+    document.getElementById('forecast-list').innerHTML = days.map(d => `
+      <div class="forecast-row">
+        <div class="forecast-day">${d.label}</div>
+        <div class="forecast-icon">${WeatherModule.conditionIcon(d.condition)}</div>
+        <div class="forecast-rain">☔ ${d.rain}%</div>
+        <div class="forecast-temps">${d.max}° / ${d.min}°</div>
+      </div>`).join('');
+  }
+
+  /* ---------- TIDES screen ---------- */
+  function renderTides(){
+    const loc = LocationModule.get();
+    document.getElementById('tides-loc').textContent = `${loc.city}, ${loc.state}`;
+    const tide = TidesModule.generateMock();
+    document.getElementById('tide-current-height').textContent = `${tide.currentHeight} m`;
+    const badge = document.getElementById('tide-badge');
+    badge.textContent = tide.current === 'alta' ? 'Maré Alta' : 'Maré Baixa';
+    badge.className = `tide-badge ${tide.current}`;
+    document.getElementById('tide-list').innerHTML = tide.events.map(e => `
+      <div class="tide-item"><span>Maré ${e.type} — ${e.time}</span><b>${e.height} m</b></div>`).join('');
+    document.getElementById('moon-phase').textContent = tide.moonPhase;
+    document.getElementById('moon-times').textContent = `Nascer ${tide.moonrise} · Pôr ${tide.moonset}`;
+    document.getElementById('moon-icon').textContent = tide.moonPhase.split(' ')[0];
+    drawTideChart(tide);
+  }
+  function drawTideChart(tide){
+    const canvas = document.getElementById('tide-chart');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = canvas.offsetWidth;
+    const h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const heights = tide.events.map(e => parseFloat(e.height));
+    const max = Math.max(...heights, 2.5), min = 0;
+    const stepX = w / (heights.length - 1);
+    ctx.beginPath();
+    heights.forEach((val,i) => {
+      const x = i*stepX;
+      const y = h - ((val-min)/(max-min)) * (h-16) - 8;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#3FA9F5';
+    ctx.stroke();
+    heights.forEach((val,i) => {
+      const x = i*stepX;
+      const y = h - ((val-min)/(max-min)) * (h-16) - 8;
+      ctx.beginPath();
+      ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.fillStyle = '#3FA9F5';
+      ctx.fill();
+    });
+  }
+
+  /* ---------- ALERTS screen ---------- */
+  function renderAlerts(){
+    const data = AlertsModule.generateMock();
+    const all = [...AlertsModule.levels];
+    document.getElementById('alerts-list').innerHTML = all.map(lvl => {
+      const isActive = lvl.key === data.active.key;
+      return `<div class="alert-item alert-${lvl.key}">
+        <div class="alert-dot"></div>
+        <div><div class="alert-title">${lvl.label} ${isActive ? '· Atual' : ''}</div><div class="alert-desc">${lvl.desc}</div></div>
+      </div>`;
+    }).join('');
+    if(data.active.key === 'red'){
+      showToast('🔴 Alerta vermelho emitido — grande perigo na sua região!');
+    }
+  }
+
+  /* ---------- FAMILY / CONTACTS screen ---------- */
+  function renderContacts(filter=''){
+    const list = ContactsModule.getAll()
+      .filter(c => c.name.toLowerCase().includes(filter.toLowerCase()))
+      .sort((a,b) => (b.favorite - a.favorite));
+    document.getElementById('contacts-list').innerHTML = list.length ? list.map(c => `
+      <div class="card contact-row" data-id="${c.id}">
+        <div class="avatar">${c.name.charAt(0).toUpperCase()}</div>
+        <div class="contact-info">
+          <div class="contact-name">${c.name} <span class="fav-star" data-fav="${c.id}">${c.favorite ? '⭐' : '☆'}</span></div>
+          <div class="contact-phone">${c.phone || 'sem telefone'}</div>
+        </div>
+        <div class="contact-actions">
+          <button class="icon-btn call" data-call="${c.phone}">📞</button>
+          <button class="icon-btn wpp" data-wpp="${c.phone}">💬</button>
+          <button class="icon-btn edit" data-edit="${c.id}">✏️</button>
+          <button class="icon-btn del" data-del="${c.id}">🗑️</button>
+        </div>
+      </div>`).join('') : `<p style="text-align:center; color:var(--text-soft); margin-top:30px;">Nenhum contato encontrado.</p>`;
+  }
+
+  function openContactModal(contact=null){
+    document.getElementById('contact-modal-title').textContent = contact ? 'Editar contato' : 'Novo contato';
+    document.getElementById('contact-id').value = contact ? contact.id : '';
+    document.getElementById('c-name').value = contact ? contact.name : '';
+    document.getElementById('c-phone').value = contact ? contact.phone : '';
+    document.getElementById('c-address').value = contact ? contact.address : '';
+    document.getElementById('c-notes').value = contact ? contact.notes : '';
+    document.getElementById('contact-modal').classList.add('show');
+  }
+  function closeContactModal(){ document.getElementById('contact-modal').classList.remove('show'); }
+
+  /* ---------- CHAT screen ---------- */
+  function renderChatIfEmpty(){
+    const log = document.getElementById('chat-log');
+    if(log.children.length === 0){
+      addChatBubble('bot', 'Oi! Eu sou a assistente do Clima Família IA 💙 Pergunte sobre clima, maré, alertas ou peça um lembrete.');
+    }
+  }
+  function addChatBubble(role, text){
+    const log = document.getElementById('chat-log');
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+  function sendChatMessage(){
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if(!text) return;
+    addChatBubble('user', text);
+    input.value = '';
+    const log = document.getElementById('chat-log');
+    const typing = document.createElement('div');
+    typing.className = 'chat-msg bot';
+    typing.innerHTML = '<span class="typing"><span></span><span></span><span></span></span>';
+    log.appendChild(typing);
+    log.scrollTop = log.scrollHeight;
+    setTimeout(() => {
+      typing.remove();
+      addChatBubble('bot', ChatbotModule.reply(text));
+    }, 700 + Math.random()*500);
+  }
+
+  /* ---------- TOAST / notifications ---------- */
+  function showToast(msg){
+    const stack = document.getElementById('toast-stack');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    stack.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  /* ---------- SETTINGS ---------- */
+  function applySettings(){
+    const s = StorageModule.get(StorageModule.KEYS.settings, { theme:'light', fontScale:1, sound:true, notif:true, auto:true });
+    document.getElementById('app').setAttribute('data-theme', s.theme);
+    document.documentElement.style.setProperty('--font-scale', s.fontScale);
+    document.querySelectorAll('.theme-dot').forEach(d => d.classList.toggle('active', d.dataset.themeChoice === s.theme));
+    document.getElementById('toggle-sound').classList.toggle('on', s.sound);
+    document.getElementById('toggle-notif').classList.toggle('on', s.notif);
+    document.getElementById('toggle-auto').classList.toggle('on', s.auto);
+    return s;
+  }
+  function saveSettings(patch){
+    const s = { ...StorageModule.get(StorageModule.KEYS.settings, { theme:'light', fontScale:1, sound:true, notif:true, auto:true }), ...patch };
+    StorageModule.set(StorageModule.KEYS.settings, s);
+    applySettings();
+  }
+
+  /* ---------- EVENT BINDINGS ---------- */
+  function bindEvents(){
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => goto(btn.dataset.screen)));
+    document.querySelectorAll('.quick-tile').forEach(t => t.addEventListener('click', () => goto(t.dataset.goto)));
+    document.getElementById('refresh-weather').addEventListener('click', () => { WeatherModule.generateMock(); renderWeather(); showToast('Clima atualizado ✅'); });
+
+    // WhatsApp floating button
+    document.getElementById('fab-whatsapp').addEventListener('click', () => {
+      window.open('https://wa.me/', '_blank');
+    });
+
+    // Contacts
+    document.getElementById('fab-add-contact').addEventListener('click', () => openContactModal());
+    document.getElementById('cancel-contact').addEventListener('click', closeContactModal);
+    document.getElementById('save-contact').addEventListener('click', () => {
+      const id = document.getElementById('contact-id').value;
+      const name = document.getElementById('c-name').value.trim();
+      const phone = document.getElementById('c-phone').value.trim();
+      if(!name){ showToast('Digite um nome para o contato'); return; }
+      ContactsModule.save({
+        id: id || null,
+        name, phone,
+        address: document.getElementById('c-address').value.trim(),
+        notes: document.getElementById('c-notes').value.trim()
+      });
+      closeContactModal();
+      renderContacts(document.getElementById('contact-search').value);
+      showToast('Contato salvo ✅');
+    });
+    document.getElementById('contact-search').addEventListener('input', e => renderContacts(e.target.value));
+    document.getElementById('contacts-list').addEventListener('click', e => {
+      const call = e.target.closest('[data-call]');
+      const wpp = e.target.closest('[data-wpp]');
+      const edit = e.target.closest('[data-edit]');
+      const del = e.target.closest('[data-del]');
+      const fav = e.target.closest('[data-fav]');
+      if(call) window.open(`tel:${call.dataset.call}`);
+      if(wpp) window.open(`https://wa.me/${wpp.dataset.wpp.replace(/\D/g,'')}`, '_blank');
+      if(edit){ const c = ContactsModule.getAll().find(c => c.id === edit.dataset.edit); openContactModal(c); }
+      if(del){ ContactsModule.remove(del.dataset.del); renderContacts(document.getElementById('contact-search').value); showToast('Contato removido'); }
+      if(fav){ ContactsModule.toggleFavorite(fav.dataset.fav); renderContacts(document.getElementById('contact-search').value); }
+    });
+
+    // Chat
+    document.getElementById('chat-send').addEventListener('click', sendChatMessage);
+    document.getElementById('chat-input').addEventListener('keydown', e => { if(e.key === 'Enter') sendChatMessage(); });
+    document.getElementById('chat-mic').addEventListener('click', () => showToast('🎙️ Entrada por voz — em breve nesta versão'));
+
+    // Settings
+    document.querySelectorAll('.theme-dot').forEach(dot => dot.addEventListener('click', () => saveSettings({ theme: dot.dataset.themeChoice })));
+    document.getElementById('font-inc').addEventListener('click', () => { const s = applySettings(); saveSettings({ fontScale: Math.min(1.3, s.fontScale + 0.1) }); });
+    document.getElementById('font-dec').addEventListener('click', () => { const s = applySettings(); saveSettings({ fontScale: Math.max(0.85, s.fontScale - 0.1) }); });
+    ['sound','notif','auto'].forEach(key => {
+      document.getElementById('toggle-'+key).addEventListener('click', () => {
+        const s = applySettings();
+        saveSettings({ [key]: !s[key] });
+      });
+    });
+    document.getElementById('btn-detect-location').addEventListener('click', () => {
+      LocationModule.detect(loc => {
+        document.getElementById('settings-location-info').textContent = `${loc.city}, ${loc.state} — ${loc.source} (lat ${loc.lat.toFixed(2)}, lon ${loc.lon.toFixed(2)})`;
+        showToast('Localização atualizada 📍');
+      });
+    });
+  }
+
+  /* ---------- INIT ---------- */
+  function init(){
+    ContactsModule.seedIfEmpty();
+    applySettings();
+    ClockModule.init();
+    bindEvents();
+    LocationModule.detect(loc => {
+      document.getElementById('settings-location-info').textContent = `${loc.city}, ${loc.state} — ${loc.source}`;
+      renderHomePreview();
+    });
+    // Notificações simuladas periódicas
+    setTimeout(() => showToast('☔ Vai chover em 20 minutos'), 6000);
+    setInterval(() => {
+      const s = StorageModule.get(StorageModule.KEYS.settings, { notif:true });
+      if(s.notif) showToast('🔔 Painel atualizado com novos dados simulados');
+    }, 90000);
+  }
+
+  return { init, goto };
+})();
+
+document.addEventListener('DOMContentLoaded', AppModule.init);
+</script>
+
+<!-- Módulos JS carregados em ordem de dependência -->
+<script src="js/storage.js"></script>
+<script src="js/clock.js"></script>
+<script src="js/location.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/tides.js"></script>
+<script src="js/alerts.js"></script>
+<script src="js/contacts.js"></script>
+<script src="js/chatbot.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
