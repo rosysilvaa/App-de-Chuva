@@ -50,14 +50,19 @@ Cada módulo JS é independente e exposto como um objeto (`WeatherModule`, `Tide
 
 ---
 
-## 🚀 Como usar
+## 🚀 Demostração
 
-Não é necessário instalar nada.
+<img width="1366" height="768" alt="Captura de tela 2026-07-05 221808" src="https://github.com/user-attachments/assets/103b7666-7333-48eb-a26a-27f977190950" />
 
-1. Baixe/clone a pasta do projeto
-2. Abra o arquivo `index.html` no navegador (duplo clique ou `Live Server` no VS Code)
+<img width="1366" height="768" alt="Captura de tela 2026-07-05 221830" src="https://github.com/user-attachments/assets/d46cd7e1-f932-42ee-901b-bc67966f76e8" />
 
-> 💡 Se abrir o `index.html` direto do sistema de arquivos e algum navegador bloquear a Geolocalização, isso é esperado — o app usa uma localização padrão (Recife, PE) como fallback.
+<img width="1366" height="768" alt="Captura de tela 2026-07-05 221839" src="https://github.com/user-attachments/assets/76162b94-c1ea-4927-8f30-f794a54c07a2" />
+
+<img width="1366" height="768" alt="Captura de tela 2026-07-05 221857" src="https://github.com/user-attachments/assets/7b4704c6-dd25-4e02-9eb3-19e2e9b994ed" />
+
+<img width="1366" height="768" alt="Captura de tela 2026-07-05 221905" src="https://github.com/user-attachments/assets/13c0b010-6fdd-4626-8fdd-aa250717a5b7" />
+
+<img width="1366" height="768" alt="Captura de tela 2026-07-05 221916" src="https://github.com/user-attachments/assets/59adbe3d-0fee-4675-a533-c72114c19611" />
 
 ---
 
